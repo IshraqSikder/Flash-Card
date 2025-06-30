@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flash_card/screens/flashcard_app.dart';
+import 'package:flash_card/screens/flashcard_home.dart';
 import 'package:device_preview/device_preview.dart';
 
 void main() {

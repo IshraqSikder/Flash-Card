@@ -1,12 +1,6 @@
+import 'package:flash_card/models/flashcard.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
-
-class Flashcard {
-  final String question;
-  final String answer;
-
-  Flashcard({required this.question, required this.answer});
-}
 
 class FlashcardHome extends StatefulWidget {
   const FlashcardHome({super.key});
@@ -38,11 +32,7 @@ class _FlashcardHomeState extends State<FlashcardHome>
   }
 
   void _flipCard() {
-    if (showAnswer) {
-      _controller.reverse();
-    } else {
-      _controller.forward();
-    }
+    showAnswer ? _controller.reverse() : _controller.forward();
     setState(() {
       showAnswer = !showAnswer;
     });
@@ -73,17 +63,19 @@ class _FlashcardHomeState extends State<FlashcardHome>
   }
 
   void _showAddEditDialog(int? index) {
+    bool isEditingMode = (index != null);
+
     final questionController = TextEditingController(
-      text: index != null ? flashcards[index].question : '',
+      text: index != null ? flashcards[index].question.trim() : '',
     );
     final answerController = TextEditingController(
-      text: index != null ? flashcards[index].answer : '',
+      text: index != null ? flashcards[index].answer.trim() : '',
     );
 
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text(flashcards.isEmpty ? 'Add Flashcard' : 'Edit Flashcard'),
+        title: Text(isEditingMode ? 'Edit Flashcard' : 'Add Flashcard'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -151,87 +143,79 @@ class _FlashcardHomeState extends State<FlashcardHome>
   }
 
   Widget _buildCard(bool isBack) {
-    if (flashcards.isEmpty ||
-        currentIndex < 0 ||
-        currentIndex >= flashcards.length) {
-      return Container(
-        margin: EdgeInsets.symmetric(horizontal: 35.0),
-        padding: const EdgeInsets.all(35.0),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          gradient: const LinearGradient(
-            colors: [Color(0xFFFFD740), Color(0xFFFFA000)],
-          ),
-        ),
-        child: const Center(
-          child: Text(
-            "No flashcards available.\nTap + to add one.",
+    final question = flashcards.isNotEmpty
+        ? flashcards[currentIndex].question
+        : '';
+    final answer = flashcards.isNotEmpty ? flashcards[currentIndex].answer : '';
+    return flashcards.isEmpty
+        ? Text(
+            "No flashcards available.",
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
-          ),
-        ),
-      );
-    }
-
-    final question = flashcards[currentIndex].question;
-    final answer = flashcards[currentIndex].answer;
-
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 35.0),
-      padding: const EdgeInsets.all(35.0),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        gradient: const LinearGradient(
-          colors: [Color(0xFFFFD740), Color(0xFFFFA000)],
-        ),
-      ),
-      child: Center(
-        child: Column(
-          children: [
-            Text(
-              isBack ? answer : question,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey,
             ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              onPressed: _flipCard,
-              label: Text(showAnswer ? 'Hide Answer' : 'Show Answer'),
-              icon: const Icon(Icons.flip),
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.all(18.0),
-                backgroundColor: Colors.lightGreen,
-                foregroundColor: Colors.black,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16.0),
-                ),
+          )
+        : Container(
+            margin: EdgeInsets.symmetric(horizontal: 35.0),
+            padding: const EdgeInsets.all(35.0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              gradient: const LinearGradient(
+                colors: [Color(0xFFFFD740), Color(0xFFFFA000)],
               ),
             ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () => _showAddEditDialog(currentIndex),
-                  child: const Text(
-                    'Edit',
-                    style: TextStyle(color: Colors.black),
+            child: Center(
+              child: Column(
+                children: [
+                  Text(
+                    isBack ? answer.trim() : question.trim(),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                ),
-                ElevatedButton(
-                  onPressed: () => _deleteCard(currentIndex),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    foregroundColor: Colors.white,
+                  const SizedBox(height: 20),
+                  ElevatedButton.icon(
+                    onPressed: _flipCard,
+                    label: Text(showAnswer ? 'Hide Answer' : 'Show Answer'),
+                    icon: const Icon(Icons.flip),
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.all(18.0),
+                      backgroundColor: Colors.lightGreen,
+                      foregroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16.0),
+                      ),
+                    ),
                   ),
-                  child: const Text('Delete'),
-                ),
-              ],
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () => _showAddEditDialog(currentIndex),
+                        child: const Text(
+                          'Edit',
+                          style: TextStyle(color: Colors.black),
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => _deleteCard(currentIndex),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: const Text('Delete'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
-      ),
-    );
+          );
   }
 
   @override
